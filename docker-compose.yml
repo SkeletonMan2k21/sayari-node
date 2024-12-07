@@ -1,0 +1,36 @@
+services:
+  node:
+    build:
+      context: .
+      dockerfile: ./docker/containers/node/Dockerfile
+      target: base
+    volumes:
+      - ./node/src:/home/node/app/src
+      - ./node/nodemon.json:/home/node/app/nodemon.json
+      - ./node/tsconfig.json:/home/node/app/tsconfig.json
+    container_name: ts-node-docker
+    expose:
+      - '4000'
+    ports:
+      - '4000:4000'
+    command: npm run dev
+
+  db:
+    build:
+      context: .
+      dockerfile: ./docker/containers/postgres/Dockerfile
+      target: base
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: sayari
+      POSTGRES_HOST_AUTH_METHOD: trust 
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres -P password -d sayari'"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    expose:
+      - '5432'
+    ports:
+      - '5432:5432'
