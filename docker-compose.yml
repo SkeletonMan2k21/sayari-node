@@ -20,11 +20,12 @@ services:
       context: .
       dockerfile: ./docker/containers/postgres/Dockerfile
       target: base
+#    volumes:
+#      - ./docker/containers/postgres/sayari.sql:/docker-entrypoint-initdb.d/sayari.sql
     restart: always
     environment:
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: sayari
-      POSTGRES_HOST_AUTH_METHOD: trust 
+      POSTGRES_DB: sayari2
     healthcheck:
       test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres -P password -d sayari'"]
       interval: 1s
