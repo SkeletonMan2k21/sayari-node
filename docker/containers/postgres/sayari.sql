@@ -20,6 +20,9 @@ CREATE TABLE users
 CREATE INDEX idx_users_created_date ON users (created_date);
 CREATE INDEX idx_users_updated_date ON users (updated_date);
 
+-- Dummy user
+INSERT INTO users (username, first_name, last_name, password, email) VALUES ('jsmith99', 'John', 'Smith', 'foobar', 'john@smith.com');
+
 -- Composite indexes because we're gonna want to search for "not deleted" users matching a specified email or username
 CREATE INDEX idx_users_username_deletion_date ON users (username, deletion_date);
 CREATE INDEX idx_users_email_deletion_date ON users (email, deletion_date);
