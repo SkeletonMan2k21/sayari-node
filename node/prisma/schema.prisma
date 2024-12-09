@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Answer {
+  id            Int       @id @default(autoincrement())
+  question_id   Int
+  user_id       Int
+  body          String
+  posted_date   DateTime  @default(now()) @db.Timestamp(6)
+  accepted_date DateTime? @db.Timestamp(6)
+  deletion_date DateTime? @db.Timestamp(6)
+  question      Question  @relation(fields: [question_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user          User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([question_id], map: "fk_answers_question_id")
+  @@index([user_id], map: "fk_answers_user_id")
+  @@index([accepted_date], map: "idx_answers_accepted_date")
+  @@index([deletion_date], map: "idx_answers_deletion_date")
+  @@index([posted_date], map: "idx_answers_posted_date")
+  @@map("answers")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Comment {
+  id             Int          @id @default(autoincrement())
+  user_id        Int
+  parent_id      Int
+  parent_type_id Int
+  body           String
+  posted_date    DateTime     @default(now()) @db.Timestamp(6)
+  deletion_date  DateTime?    @db.Timestamp(6)
+  parent_type    ParentType   @relation(fields: [parent_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user           User         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([user_id], map: "fk_comments_user_id")
+  @@index([deletion_date], map: "idx_comments_deletion_date")
+  @@index([parent_id, parent_type_id], map: "idx_comments_parent_id_parent_type_id")
+  @@index([posted_date], map: "idx_comments_posted_date")
+  @@map("comments")
+}
+
+model ParentType {
+  id       Int        @id @default(autoincrement())
+  type     String     @unique @db.VarChar(25)
+  comments Comment[]
+  votes    Vote[]
+  @@map("parent_types")
+}
+
+model Question {
+  id             Int              @id @default(autoincrement())
+  user_id        Int
+  posted_date    DateTime         @default(now()) @db.Timestamp(6)
+  score          Int              @default(0)
+  body           String
+  deletion_date  DateTime?        @db.Timestamp(6)
+  answers        Answer[]
+  user           User             @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  questions_tags QuestionTag[]
+
+  @@index([user_id], map: "fk_questions_user_id")
+  @@index([deletion_date], map: "idx_questions_deletion_date")
+  @@index([posted_date], map: "idx_questions_posted_date")
+  @@index([score], map: "idx_questions_score")
+  @@map("questions")
+}
+
+model QuestionTag {
+  question_id Int
+  tag_id      Int
+  added_date  DateTime  @db.Timestamp(6)
+  question    Question  @relation(fields: [question_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tag         Tag       @relation(fields: [tag_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([question_id, tag_id])
+  @@index([added_date], map: "idx_questions_tags_added_date")
+  @@index([question_id], map: "idx_questions_tags_question_id")
+  @@index([tag_id], map: "idx_questions_tags_tag_id")
+  @@map("questions_tags")
+}
+
+model Tag {
+  id             Int              @id @default(autoincrement())
+  tag            String           @unique @db.VarChar(50)
+  description    String
+  created_date   DateTime         @default(now()) @db.Timestamp(6)
+  questions_tags QuestionTag[]
+
+  @@index([created_date], map: "idx_tags_created_date")
+  @@map("tags")
+}
+
+model User {
+  id              Int         @id @default(autoincrement())
+  username        String      @unique @db.VarChar(40)
+  first_name      String      @db.VarChar(50)
+  last_name       String      @db.VarChar(50)
+  password        String      @db.VarChar(60)
+  email           String      @unique @db.VarChar(50)
+  created_date    DateTime    @default(now()) @db.Timestamp(6)
+  website_url     String?     @db.VarChar(255)
+  github_username String?     @db.VarChar(40)
+  avatar_url      String?     @db.VarChar(255)
+  updated_date    DateTime    @default(now()) @db.Timestamp(6)
+  deletion_date   DateTime?   @db.Timestamp(6)
+  answers         Answer[]
+  comments        Comment[]
+  questions       Question[]
+
+  @@index([created_date], map: "idx_users_created_date")
+  @@index([created_date, deletion_date], map: "idx_users_created_date_deletion_date")
+  @@index([email, deletion_date], map: "idx_users_email_deletion_date")
+  @@index([updated_date], map: "idx_users_updated_date")
+  @@index([username, deletion_date], map: "idx_users_username_deletion_date")
+  @@map("users")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Vote {
+  id             Int          @id @default(autoincrement())
+  value          Int          @db.SmallInt
+  parent_id      Int
+  parent_type_id Int
+  parent_type    ParentType @relation(fields: [parent_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([parent_id, parent_type_id], map: "idx_votes_parent_id_parent_type_id")
+  @@index([value], map: "idx_votes_value")
+  @@map("votes")
+}

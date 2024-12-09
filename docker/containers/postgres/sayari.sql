@@ -38,7 +38,8 @@ CREATE TABLE user_stats
   total_reach integer NOT NULL DEFAULT 0 CONSTRAINT con_user_stats_total_reach_positive CHECK (total_reach >= 0),       -- unsigned, can have zero reach but not negative
   num_answers integer NOT NULL DEFAULT 0 CONSTRAINT con_user_stats_num_answers_positive CHECK (num_answers >= 0),       -- unsigned, can't have less than zero answers posted
   num_questions integer NOT NULL DEFAULT 0 CONSTRAINT con_user_stats_num_questions_positive CHECK (num_questions >= 0), -- unsigned, can't have less than zero questions posted
-  insertion_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  insertion_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, insertion_date);                                                                                -- Composite primary key, rather than a numeric primary and a unique key here
 );
 
 -- Composite index on user id & insertion date, we'll want to query latest status for a given user
