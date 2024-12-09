@@ -8,7 +8,6 @@ services:
       - ./node/src:/home/node/app/src
       - ./node/nodemon.json:/home/node/app/nodemon.json
       - ./node/tsconfig.json:/home/node/app/tsconfig.json
-    container_name: ts-node-docker
     expose:
       - '4000'
     ports:
@@ -35,3 +34,15 @@ services:
       - '5432'
     ports:
       - '5432:5432'
+      
+  redis:
+    build:
+      context: .
+      dockerfile: ./docker/containers/redis/Dockerfile
+      target: base
+    volumes:
+      - ./docker/containers/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    expose:
+      - '6379'
+    ports:
+      - '6379:6379'
