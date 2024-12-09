@@ -8,6 +8,7 @@ services:
       - ./node/src:/home/node/app/src
       - ./node/nodemon.json:/home/node/app/nodemon.json
       - ./node/tsconfig.json:/home/node/app/tsconfig.json
+      - ./node/.env:/home/node/app/.env
     expose:
       - '4000'
     ports:
